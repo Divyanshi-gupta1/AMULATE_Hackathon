@@ -72,8 +72,8 @@ class ProductivityAgent:
                 duration = int(word)
                 break
 
-        if "before dinner" in text:
-            time_hint = "before dinner"
+        if "after dinner" in text:
+            time_hint = "after dinner"
         elif "after lunch" in text:
             time_hint = "after lunch"
         else:
