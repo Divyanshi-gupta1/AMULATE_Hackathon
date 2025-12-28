@@ -1,6 +1,9 @@
+DEMO_MODE = True
+
 class LanguageModel:
     def interpret(self, user_input):
-        print("→ LLM interpreting user intent")
+        if not DEMO_MODE:
+            print("→ LLM interpreting user intent")
         return user_input.lower()
 
 
@@ -17,7 +20,8 @@ class CalendarTool:
         }
         self.events.append(event)
 
-        print("→ Calendar updated")
+        if not DEMO_MODE:
+            print("→ Calendar updated")
         print(f"→ Event added: {event}")
 
 
@@ -32,29 +36,35 @@ class ProductivityAgent:
             self.suggest_next_task()
             return
 
-        print("→ Understanding user goal")
-        task = self.parse_task(user_input)
+        if not DEMO_MODE:
+            print("→ Understanding user goal")
+        task = self.interpret_task(user_input)
 
-        print("→ Planning tasks")
+        if not DEMO_MODE:
+            print("→ Planning tasks")
         self.tasks.append(task)
 
-        print("→ Scheduling task")
+        if not DEMO_MODE:
+            print("→ Scheduling task")
         self.schedule_task(task)
 
-        print("→ Reflecting on outcome")
+        if not DEMO_MODE:
+            print("→ Reflecting on outcome")
         self.reflect()
 
-    def parse_task(self, user_input):
-        print("→ Extracting task details")
+    def interpret_task(self, user_input):
+        if not DEMO_MODE:
+            print("→ Extracting task details")
 
         text = self.llm.interpret(user_input)
 
-        if "cook" in text or "cooking" in text:
-            name = "cooking"
-        elif "study" in text:
+        if any(word in text for word in ["dsa", "coding"]):
+            name = "coding"
+        elif any(word in text for word in ["exam", "assignment", "study", "revision"]):
             name = "studying"
         else:
-            name = "coding"
+            name = "personal task"
+
 
         duration = 2
         for word in text.split():
@@ -82,6 +92,7 @@ class ProductivityAgent:
         print(f"→ Assigned priority: {priority}")
 
         return {
+            "raw_task": user_input.strip(),
             "name": name,
             "duration": duration,
             "time_hint": time_hint,
@@ -101,6 +112,20 @@ class ProductivityAgent:
             print("→ No tasks found in memory")
             print("→ Note: Memory resets when the agent restarts")
             return
+
+        priority_score = {"high": 2, "medium": 1}
+
+        best_task = max(
+            self.tasks,
+            key=lambda t: (priority_score[t["priority"]], t["duration"])
+        )
+
+        print(
+            f"→ Suggested next task: {best_task['raw_task']} "
+            f"({best_task['priority']} priority, "
+            f"{best_task['duration']} hours, "
+            f"{best_task['time_hint']})"
+        )
 
         print("→ Reviewing stored tasks")
         for task in self.tasks:
