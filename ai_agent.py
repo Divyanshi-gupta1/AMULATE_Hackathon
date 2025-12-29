@@ -140,6 +140,23 @@ class ProductivityAgent:
         else:
             print(f"→ Reflection: {len(self.tasks)} task(s) managed successfully")
 
+    def run_and_collect_output(self, user_input):
+        output = []
+
+        def capture_print(*args):
+            output.append(" ".join(map(str, args)))
+
+        import builtins
+        original_print = builtins.print
+        builtins.print = capture_print
+
+        try:
+            self.run(user_input)
+        finally:
+            builtins.print = original_print
+
+        return output
+
 if __name__ == "__main__":
     agent = ProductivityAgent()
 
